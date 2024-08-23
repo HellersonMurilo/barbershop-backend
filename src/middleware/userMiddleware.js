@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const User = require("../models/userModel");
 
 const validateUser = (req, res, next) => {
   const { nome, sobrenome, email, senha } = req.body;
@@ -55,7 +56,43 @@ const hashPassword = async (req, res, next) => {
   }
 };
 
+const validatePassword = async (req, res, next) => {
+  try {
+    const { email, senha } = req.body;
+
+    if (!email || !senha) {
+      return res.status(400).json({
+        msg: "Informe o E-mail e Senha",
+      });
+    }
+
+    //verificação do usuario
+    const usuario = await User.findOne({ where: { email } });
+
+    if (!usuario) {
+      return res.status(400).json({
+        msg: "Usuario nao encontrado",
+      });
+    }
+
+    const validarSenha = await bcrypt.compare(senha, usuario.senha);
+
+    if (!validarSenha) {
+      return res.status(400).json({
+        msg: "Senha incorreta",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Ocorreu um erro ao validar o usuario",
+    });
+  }
+
+  return next();
+};
+
 module.exports = {
   validateUser,
-  hashPassword
+  hashPassword,
+  validatePassword,
 };

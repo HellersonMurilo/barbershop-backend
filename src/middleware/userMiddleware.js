@@ -1,3 +1,5 @@
+const bcrypt = require("bcrypt");
+
 const validateUser = (req, res, next) => {
   const { nome, sobrenome, email, senha } = req.body;
 
@@ -28,8 +30,32 @@ const validateUser = (req, res, next) => {
       campo: "senha",
     });
   }
+
+  return next();
+};
+
+const hashPassword = async (req, res, next) => {
+  try {
+    const { senha } = req.body;
+
+    if (!senha) {
+      return res.status(400).json({
+        msg: "Por favor, informe uma senha!",
+      });
+    }
+
+    const saltRodad = 10;
+    req.body.senha = await bcrypt.hash(senha, saltRodad);
+
+    return next();
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Ocorreu um erro criptografar a senha",
+    });
+  }
 };
 
 module.exports = {
   validateUser,
+  hashPassword
 };

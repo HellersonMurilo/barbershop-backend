@@ -1,9 +1,13 @@
+const User = require("../models/userModel");
+
 const userController = {
-  createUser: async (req, res) => {
+  signUp: async (req, res) => {
     try {
       const { nome, sobrenome, email, senha } = req.body;
 
-      return res.status(200).json({
+      const newUser = await User.create({ nome, sobrenome, email, senha });
+
+      return res.status(201).json({
         msg: "Usuario criado com sucesso!",
       });
     } catch (error) {
@@ -14,4 +18,4 @@ const userController = {
   },
 };
 
-module.exports = userController
+module.exports = userController;
